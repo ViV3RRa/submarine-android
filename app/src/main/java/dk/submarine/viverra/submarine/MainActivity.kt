@@ -9,12 +9,14 @@ import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
+import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBScanExpression
@@ -22,11 +24,13 @@ import com.amazonaws.regions.Region
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import dk.submarine.viverra.submarine.Fragments.BudgetOverviewFragment
+import dk.submarine.viverra.submarine.Fragments.ProductDetailsListFragment
+import dk.submarine.viverra.submarine.Modle.BoughtItem
 import dk.submarine.viverra.submarine.Modle.Product
 import dk.submarine.viverra.submarine.Util.AWSUtil
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.content_main.*
 import java.util.*
 
 fun Context.MainActivityIntent(): Intent {
@@ -40,10 +44,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private var result = listOf<Product>()
 
+    private var defaultFragment = BudgetOverviewFragment.newInstance()
+    private var currentFragment: Fragment = defaultFragment
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+        if (savedInstanceState == null) {
+            supportFragmentManager
+                    .beginTransaction()
+                    .add(R.id.main_content_layout, currentFragment, "BudgetOverviewFragment")
+                    .commit()
+        }
 
         fab.setOnClickListener { view ->
             if ( !result.isEmpty()) {
@@ -53,8 +67,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 Log.i(LOG_TAG, "resultSize: " + result.size + ", randomNumber: " + randomNumber + ", index: " + index)
 
                 val product = result[index]
-                Snackbar.make(view, "ProductName:   " + product.name + "   " + (product.totalPriceWithoutDiscount - product.discountAmount) + ",-", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
+                Snackbar.make(view, "Do you wanna go home?", Snackbar.LENGTH_LONG)
+                        .setAction("HOME", homeOnClickListener).show()
             } else {
                 Snackbar.make(view, "NO Products!! - " + result.size, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show()
@@ -86,18 +100,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val mythread = Thread(runnable)
         mythread.start()
 
-        bottom_navigation.selectedItemId = R.id.navigation_budget
+        bottom_navigation.selectedItemId = R.id.navigation_home
         bottom_navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
     override fun onResume() {
         super.onResume()
-        bottom_navigation.selectedItemId = R.id.navigation_budget
+        bottom_navigation.selectedItemId = R.id.navigation_home
     }
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
+        } else if (currentFragment.javaClass.kotlin != defaultFragment.javaClass.kotlin) {
+            changeFragment(defaultFragment)
+            bottom_navigation.selectedItemId = R.id.navigation_home
         } else {
             super.onBackPressed()
         }
@@ -114,12 +131,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Log.i(LOG_TAG, "getProductsNewerThan()")
 
         val eav = HashMap<String, AttributeValue>()
-        eav.put(":val1", AttributeValue().withN("1514764801000"))
+        eav.put(":val1", AttributeValue().withN("1518739200000"))
 
         val scanExpression = DynamoDBScanExpression()
-                .withFilterExpression("purchase_time > :val1").withExpressionAttributeValues(eav)
+                .withFilterExpression("insert_time > :val1").withExpressionAttributeValues(eav)
 
         result = mapper.scan(Product::class.java, scanExpression)
+        val db = getDatabase()
+
+        for (product: Product in result) {
+            db.productModel().addProduct(product)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -141,15 +163,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_home -> {
-                main_text.setText(R.string.title_home)
+                changeFragment(BudgetOverviewFragment.newInstance())
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_budget -> {
-                main_text.setText(R.string.title_budget)
+                changeFragment(ProductDetailsListFragment.newInstance())
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_settings -> {
-                main_text.setText(R.string.title_settings)
+                //main_text.setText(R.string.title_settings)
                 //startActivity(SettingsActivityIntent("DETTE ER EN KNAP"))
                 return@OnNavigationItemSelectedListener true
             }
@@ -182,5 +204,27 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private fun changeFragment(fragment: Fragment) {
+        val transaction = supportFragmentManager.beginTransaction()
+
+        // Replace whatever is in the fragment_container view with this fragment.
+        transaction.replace(R.id.main_content_layout, fragment)
+        currentFragment = fragment
+
+        // Commit the transaction
+        transaction.commit()
+    }
+
+    fun getDatabase(): AppDatabase {
+        return (this.applicationContext as SubmarineApplication).database
+    }
+
+    var homeOnClickListener: View.OnClickListener = View.OnClickListener { view ->
+        if (currentFragment.javaClass.kotlin != defaultFragment.javaClass.kotlin) {
+            changeFragment(defaultFragment)
+            bottom_navigation.selectedItemId = R.id.navigation_home
+        }
     }
 }

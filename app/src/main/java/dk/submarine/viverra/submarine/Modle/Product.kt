@@ -1,46 +1,32 @@
 package dk.submarine.viverra.submarine.Modle
 
 /**
- * Created by sKrogh on 21/11/2017.
+ * Created by sKrogh on 18/02/2018.
  */
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.*
 
-@DynamoDBTable(tableName = "products")
+import android.arch.persistence.room.ColumnInfo
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
+import android.arch.persistence.room.TypeConverters
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.*
+import dk.submarine.viverra.submarine.Util.DateConverter
+
+@Entity(tableName = "products")
+@DynamoDBTable(tableName = "product_descriptions")
 class Product {
 
-    @get:DynamoDBHashKey(attributeName = "uuid")
-    var uuid: String = ""
-
-    @get:DynamoDBAttribute(attributeName = "receipt_id")
-    var receiptId: String = ""
-
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "insert_time")
+    @TypeConverters(DateConverter::class)
     @get:DynamoDBAttribute(attributeName = "insert_time")
     var insertTime: Long = 0
 
-    @get:DynamoDBAttribute(attributeName = "purchase_time")
-    var purchaseTime: Long = 0
+    @get:DynamoDBHashKey(attributeName = "ean")
+    var ean: String = ""
 
-    @get:DynamoDBAttribute(attributeName = "product_number")
-    var ean: String? = ""
-
-    @get:DynamoDBAttribute(attributeName = "product_name")
+    @get:DynamoDBAttribute(attributeName = "name")
     var name: String = ""
 
     @get:DynamoDBAttribute(attributeName = "tag")
     var tag: String = ""
-
-    @get:DynamoDBAttribute(attributeName = "count")
-    var count: Float = 0f
-
-    @get:DynamoDBAttribute(attributeName = "item_price")
-    var itemPrice: Float = 0f
-
-    @get:DynamoDBAttribute(attributeName = "total_price_without_discount")
-    var totalPriceWithoutDiscount: Float = 0f
-
-    @get:DynamoDBAttribute(attributeName = "discount")
-    var discount: Boolean = false
-
-    @get:DynamoDBAttribute(attributeName = "discount_amount")
-    var discountAmount: Float = 0f
 }
