@@ -20,18 +20,16 @@ class SubmarineFirebaseMessagingService : FirebaseMessagingService() {
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(LOG_TAG, "Message data payload: " + remoteMessage.data)
 
-            if (/* Check if data needs to be processed by long running job */ true) {
-                // For long-running tasks (10 seconds or more) use Firebase Job Dispatcher.
+            if(remoteMessage.data.containsKey("action")) {
 
-                // TODO
-                //scheduleJob()
-            } else {
-
-                // TODO
-                // Handle message within 10 seconds
-                //handleNow()
+                var action = remoteMessage.data["action"]
+                if (action == DynamoDBIntentService.ACTION_FETCH_PRODUCTS) {
+                    DynamoDBIntentService.startActionGetNewProducts(this)
+                }
+                else if (action == DynamoDBIntentService.ACTION_FETCH_PRODUCT_ITEMS) {
+                    DynamoDBIntentService.startActionGetNewProductItems(this)
+                }
             }
-
         }
 
         // Check if message contains a notification payload.
