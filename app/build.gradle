@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'com.google.gms.google-services'
+
 android {
     compileSdkVersion 26
     defaultConfig {
@@ -31,6 +33,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support:design:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.google.firebase:firebase-core:11.4.2'
     implementation "com.amazonaws:aws-android-sdk-core:$aws_version"
     implementation "com.amazonaws:aws-android-sdk-lambda:$aws_version"
     implementation "com.amazonaws:aws-android-sdk-ddb:$aws_version"
