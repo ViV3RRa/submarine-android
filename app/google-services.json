@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "22915348458-l3d32cfd1fl32ur2u4n2uhs7522d0uua.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dk.submarine.viverra.submarine",
+            "certificate_hash": "4f7e25ddfc54899c8588d402f1ca794307b8efc2"
+          }
+        },
+        {
           "client_id": "22915348458-h4el1ha8bb8k0b79egubpbok28un0bks.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "22915348458-h4el1ha8bb8k0b79egubpbok28un0bks.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
