@@ -68,7 +68,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                 val product = result[index]
                 Snackbar.make(view, "Do you wanna go home?", Snackbar.LENGTH_LONG)
-                        .setAction("HOME", homeOnClickListener).show()
+                        .setAction("HOME", { _ ->
+                            if (currentFragment.javaClass.kotlin != defaultFragment.javaClass.kotlin) {
+                                changeFragment(defaultFragment)
+                                bottom_navigation.selectedItemId = R.id.navigation_home
+                            }
+                        }).show()
             } else {
                 Snackbar.make(view, "NO Products!! - " + result.size, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show()
@@ -219,12 +224,5 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun getDatabase(): AppDatabase {
         return (this.applicationContext as SubmarineApplication).database
-    }
-
-    var homeOnClickListener: View.OnClickListener = View.OnClickListener { view ->
-        if (currentFragment.javaClass.kotlin != defaultFragment.javaClass.kotlin) {
-            changeFragment(defaultFragment)
-            bottom_navigation.selectedItemId = R.id.navigation_home
-        }
     }
 }
