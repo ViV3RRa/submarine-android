@@ -16,7 +16,6 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBScanExpression
@@ -26,7 +25,6 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import dk.submarine.viverra.submarine.Fragments.BudgetOverviewFragment
 import dk.submarine.viverra.submarine.Fragments.ProductDetailsListFragment
-import dk.submarine.viverra.submarine.Modle.BoughtItem
 import dk.submarine.viverra.submarine.Modle.Product
 import dk.submarine.viverra.submarine.Util.AWSUtil
 import kotlinx.android.synthetic.main.activity_main.*
@@ -142,10 +140,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .withFilterExpression("insert_time > :val1").withExpressionAttributeValues(eav)
 
         result = mapper.scan(Product::class.java, scanExpression)
-        val db = getDatabase()
 
         for (product: Product in result) {
-            db.productModel().addProduct(product)
+            appDB.productModel().addProduct(product)
         }
     }
 
@@ -220,9 +217,5 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // Commit the transaction
         transaction.commit()
-    }
-
-    fun getDatabase(): AppDatabase {
-        return (this.applicationContext as SubmarineApplication).database
     }
 }

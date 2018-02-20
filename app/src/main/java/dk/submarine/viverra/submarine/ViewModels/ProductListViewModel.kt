@@ -6,7 +6,7 @@ import android.os.AsyncTask
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.AndroidViewModel
 import dk.submarine.viverra.submarine.Modle.Product
-import dk.submarine.viverra.submarine.SubmarineApplication
+import dk.submarine.viverra.submarine.appDB
 
 
 /**
@@ -17,10 +17,8 @@ class ProductListViewModel(application: Application) : AndroidViewModel(applicat
 
     private val productList: LiveData<List<Product>>
 
-    private val appDatabase: AppDatabase = this.getApplication<SubmarineApplication>().database
-
     init {
-        productList = appDatabase.productModel().allProducts
+        productList = appDB.productModel().allProducts
     }
 
     fun getAllProducts(): LiveData<List<Product>> {
@@ -28,7 +26,7 @@ class ProductListViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun deleteProduct(product: Product) {
-        deleteAsyncTask(appDatabase).execute(product)
+        deleteAsyncTask(appDB).execute(product)
     }
 
     private class deleteAsyncTask internal constructor(private val db: AppDatabase) : AsyncTask<Product, Void, Void>() {

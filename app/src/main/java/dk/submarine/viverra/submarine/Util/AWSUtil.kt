@@ -3,6 +3,7 @@ package dk.submarine.viverra.submarine.Util
 import android.content.Context
 import com.amazonaws.regions.Regions
 import com.amazonaws.auth.CognitoCachingCredentialsProvider
+import dk.submarine.viverra.submarine.AWSConsts
 
 
 /**
@@ -15,7 +16,7 @@ object AWSUtil {
         // Initialize the Amazon Cognito credentials provider
         return CognitoCachingCredentialsProvider(
                 ctx,
-                "eu-central-1:6b600f91-f978-45ed-9922-b54ae2a17080", // Identity pool ID
+                AWSConsts.IDENTITY_POOL_ID, // Identity pool ID
                 Regions.EU_CENTRAL_1 // Region
         )
     }

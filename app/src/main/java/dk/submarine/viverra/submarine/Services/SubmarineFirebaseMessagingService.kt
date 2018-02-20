@@ -18,6 +18,7 @@ class SubmarineFirebaseMessagingService : FirebaseMessagingService() {
 
         // Check if message contains a data payload.
         if (remoteMessage.data.isNotEmpty()) {
+            Log.d(LOG_TAG, "Message: " + remoteMessage)
             Log.d(LOG_TAG, "Message data payload: " + remoteMessage.data)
 
             if(remoteMessage.data.containsKey("action")) {
