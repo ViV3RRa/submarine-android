@@ -13,7 +13,7 @@ import dk.submarine.viverra.submarine.appDB
  * Created by sKrogh on 18/02/2018.
  */
 
-class ProductListViewModel(application: Application) : AndroidViewModel(application) {
+class ProductsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val productList: LiveData<List<Product>>
 
