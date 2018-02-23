@@ -1,6 +1,5 @@
 package dk.submarine.viverra.submarine.Fragments
 
-import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -12,11 +11,9 @@ import android.widget.TextView
 import dk.submarine.viverra.submarine.Modle.Product
 import dk.submarine.viverra.submarine.R
 import android.arch.lifecycle.ViewModelProviders
-import android.support.annotation.Nullable
 import android.support.design.widget.Snackbar
 import android.support.v7.widget.LinearLayoutManager
-import dk.submarine.viverra.submarine.ViewModels.ProductListViewModel
-import kotlinx.android.synthetic.main.content_main.*
+import dk.submarine.viverra.submarine.ViewModels.ProductsViewModel
 import kotlinx.android.synthetic.main.fragment_product_details_list.*
 import android.support.v7.app.AppCompatActivity
 
@@ -29,7 +26,7 @@ import android.support.v7.app.AppCompatActivity
 
 class ProductDetailsListFragment : Fragment(), View.OnLongClickListener {
 
-    lateinit var viewModel: ProductListViewModel
+    lateinit var viewModel: ProductsViewModel
     lateinit var recyclerViewAdapter: RecyclerViewAdapter
     lateinit var recyclerView: RecyclerView
 
@@ -43,7 +40,7 @@ class ProductDetailsListFragment : Fragment(), View.OnLongClickListener {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_product_details_list, container, false)
 
-        (activity as AppCompatActivity).supportActionBar!!.title = "Producter"
+        (activity as AppCompatActivity).supportActionBar!!.title = "Produkter"
 
         recyclerView = view.findViewById(R.id.products_recyclerview)
 
@@ -51,7 +48,7 @@ class ProductDetailsListFragment : Fragment(), View.OnLongClickListener {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = recyclerViewAdapter
 
-        viewModel = ViewModelProviders.of(this).get(ProductListViewModel::class.java)
+        viewModel = ViewModelProviders.of(this).get(ProductsViewModel::class.java)
 
         viewModel.getAllProducts().observe(this, Observer<List<Product>> { products -> recyclerViewAdapter.addItems(products!!) })
 

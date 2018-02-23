@@ -15,14 +15,14 @@ import dk.submarine.viverra.submarine.Util.DateConverter
 @DynamoDBTable(tableName = "product_descriptions")
 class Product {
 
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
+    @get:DynamoDBHashKey(attributeName = "ean")
+    var ean: String = ""
+
     @ColumnInfo(name = "insert_time")
     @TypeConverters(DateConverter::class)
     @get:DynamoDBAttribute(attributeName = "insert_time")
     var insertTime: Long = 0
-
-    @get:DynamoDBHashKey(attributeName = "ean")
-    var ean: String = ""
 
     @get:DynamoDBAttribute(attributeName = "name")
     var name: String = ""

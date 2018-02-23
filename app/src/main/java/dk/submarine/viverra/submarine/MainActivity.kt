@@ -26,6 +26,7 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import dk.submarine.viverra.submarine.Fragments.BudgetOverviewFragment
 import dk.submarine.viverra.submarine.Fragments.ProductDetailsListFragment
 import dk.submarine.viverra.submarine.Modle.Product
+import dk.submarine.viverra.submarine.Modle.ProductItem
 import dk.submarine.viverra.submarine.Util.AWSUtil
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
@@ -39,8 +40,6 @@ fun Context.MainActivityIntent(): Intent {
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private val LOG_TAG = "MainActivity"
-
-    private var result = listOf<Product>()
 
     private var defaultFragment = BudgetOverviewFragment.newInstance()
     private var currentFragment: Fragment = defaultFragment
@@ -58,24 +57,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         fab.setOnClickListener { view ->
-            if ( !result.isEmpty()) {
-                val random = Random()
-                var randomNumber = random.nextInt(result.size - 0)
-                val index = Math.max(randomNumber, 0)
-                Log.i(LOG_TAG, "resultSize: " + result.size + ", randomNumber: " + randomNumber + ", index: " + index)
-
-                val product = result[index]
-                Snackbar.make(view, "Do you wanna go home?", Snackbar.LENGTH_LONG)
-                        .setAction("HOME", { _ ->
-                            if (currentFragment.javaClass.kotlin != defaultFragment.javaClass.kotlin) {
-                                changeFragment(defaultFragment)
-                                bottom_navigation.selectedItemId = R.id.navigation_home
-                            }
-                        }).show()
-            } else {
-                Snackbar.make(view, "NO Products!! - " + result.size, Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
-            }
+            Snackbar.make(view, "Do you wanna go home?", Snackbar.LENGTH_LONG)
+                    .setAction("HOME", { _ ->
+                        if (currentFragment.javaClass.kotlin != defaultFragment.javaClass.kotlin) {
+                            changeFragment(defaultFragment)
+                            bottom_navigation.selectedItemId = R.id.navigation_home
+                        }
+                    }).show()
         }
 
         val toggle = ActionBarDrawerToggle(
@@ -85,7 +73,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         nav_view.setNavigationItemSelectedListener(this)
 
-        val ddbClient = Region.getRegion(Regions.EU_CENTRAL_1) // CRUCIAL
+        val ddbClient = Region.getRegion(AWSConsts.REGION) // CRUCIAL
                 .createClient(
                         AmazonDynamoDBClient::class.java,
                         AWSUtil.getCreadentialProvider(this),
@@ -99,6 +87,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val runnable = Runnable {
             //getData(mapper)
             getProductsNewerThan(mapper)
+            getProductItemsNewerThan(mapper)
         }
         val mythread = Thread(runnable)
         mythread.start()
@@ -126,8 +115,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     fun getData(mapper: DynamoDBMapper) {
         Log.i(LOG_TAG, "getData()")
         val scanExpression = DynamoDBScanExpression()
-        result = mapper.scan(Product::class.java, scanExpression)
+        //result = mapper.scan(Product::class.java, scanExpression)
 
+    }
+
+    fun getProductItemsNewerThan(mapper: DynamoDBMapper) {
+        Log.i(LOG_TAG, "getProductItemsNewerThan()")
+
+        val eav = HashMap<String, AttributeValue>()
+        eav.put(":val1", AttributeValue().withN("1518739200000"))
+
+        val scanExpression = DynamoDBScanExpression()
+                .withFilterExpression("purchase_time > :val1").withExpressionAttributeValues(eav)
+
+        val result = mapper.scan(ProductItem::class.java, scanExpression)
+
+        for (item: ProductItem in result) {
+            appDB.productItemModel().addProductItem(item)
+        }
     }
 
     fun getProductsNewerThan(mapper: DynamoDBMapper) {
@@ -139,7 +144,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val scanExpression = DynamoDBScanExpression()
                 .withFilterExpression("insert_time > :val1").withExpressionAttributeValues(eav)
 
-        result = mapper.scan(Product::class.java, scanExpression)
+        val result = mapper.scan(Product::class.java, scanExpression)
 
         for (product: Product in result) {
             appDB.productModel().addProduct(product)
