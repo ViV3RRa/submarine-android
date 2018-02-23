@@ -1,6 +1,7 @@
 package dk.submarine.viverra.submarine.Services
 
 import android.util.Log
+import com.amazonaws.auth.AWSCredentials
 import com.google.firebase.iid.FirebaseInstanceIdService
 import com.google.firebase.iid.FirebaseInstanceId
 import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest
@@ -11,8 +12,7 @@ import com.amazonaws.regions.Regions
 import dk.submarine.viverra.submarine.AWSConsts
 import dk.submarine.viverra.submarine.prefs
 import com.amazonaws.services.sns.model.SubscribeRequest
-
-
+import dk.submarine.viverra.submarine.Util.AWSUtil
 
 
 class SubmarineFirebaseInstanceIdService : FirebaseInstanceIdService() {
@@ -29,9 +29,7 @@ class SubmarineFirebaseInstanceIdService : FirebaseInstanceIdService() {
     }
 
     private fun createAWSPlatformEndpoint(pushToken: String): String {
-        val awsCredentials = BasicAWSCredentials(AWSConsts.ACCESS_KEY, AWSConsts.SECRET_KEY)
-
-        val snsClient = AmazonSNSClient(awsCredentials)
+        val snsClient = AmazonSNSClient(AWSUtil.getCreadentialProvider(applicationContext))
         snsClient.setRegion(Region.getRegion(AWSConsts.REGION))
 
         val platformEndpointRequest = CreatePlatformEndpointRequest()
@@ -47,9 +45,7 @@ class SubmarineFirebaseInstanceIdService : FirebaseInstanceIdService() {
     }
 
     private fun subscripeToNewDataTopic(endpointArn: String) {
-        val awsCredentials = BasicAWSCredentials(AWSConsts.ACCESS_KEY, AWSConsts.SECRET_KEY)
-
-        val snsClient = AmazonSNSClient(awsCredentials)
+        val snsClient = AmazonSNSClient(AWSUtil.getCreadentialProvider(applicationContext))
         snsClient.setRegion(Region.getRegion(AWSConsts.REGION))
 
         val subscribeRequest = SubscribeRequest()
